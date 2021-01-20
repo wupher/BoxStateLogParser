@@ -12,11 +12,11 @@ func main() {
 		Name:  "box_log_count",
 		Usage: "计数包厢房态",
 		Action: func(c *cli.Context) error {
-			if c.Args().Len() < 2 {
+			if c.Args().Len() < 1 {
 				fmt.Printf("请输入房态日志文件名来进行解析 \n")
-				os.Exit(1)
+				_ = cli.Exit("必须提供日志文件路径", 1)
 			}
-			fileName := c.Args().Get(1)
+			fileName := c.Args().Get(0)
 			fmt.Printf("解析日志文件： %v \n", fileName)
 			processLogFile(fileName)
 			return nil
