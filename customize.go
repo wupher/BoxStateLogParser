@@ -53,15 +53,19 @@ func lineProcess(line string) {
 }
 
 func outPut() {
-	//s, _ := json.Marshal(allMap)
-	//fmt.Println(string(s))
-	//s, _ = json.Marshal(errCompany)
-	//fmt.Println(string(s))
-	//size := reportJobs.Len()
-	//dataSpace := make([][]string, size)
 	fmt.Printf("共处理了 %d 条房态 HashCode 日志数据 \n", logCount)
 	errSize := len(errCompany)
-	fmt.Printf("共出现 %d 条房态重复\n", errSize)
+	fmt.Printf("其中有 %d 个商家出现房态重复 ", errSize)
+	errCount := 0
+	for _, count := range errCompany {
+		errCount += count
+	}
+
+	fmt.Printf("共有 %d 条重复房态消息 \n", errCount)
+	percent := float64(errCount) / float64(logCount) * 100
+
+	fmt.Printf("占比： %0.2f \n", percent)
+
 	s, _ := json.Marshal(errCompany)
 	fmt.Printf("重复商家详情：\n %v \n\n", string(s))
 }
