@@ -14,7 +14,7 @@ var gMutex sync.Mutex
 var theSet StatusSet
 var companySet CompanySet
 var errCompany map[string]int
-var occurAt map[int]int
+var occurAt map[string]int
 var logCount = 0
 
 var targetModel = "BoxStateHashCode"
@@ -23,7 +23,7 @@ func initData() {
 	theSet = make(map[int]struct{}, 0)
 	companySet = make(map[string]struct{}, 0)
 	errCompany = make(map[string]int, 0)
-	occurAt = make(map[int]int, 0)
+	occurAt = make(map[string]int, 0)
 }
 
 func lineProcess(line string) {
@@ -49,7 +49,7 @@ func lineProcess(line string) {
 		if theSet.Has(logData.Status) { //出现重复数据
 			errCompany[logData.CompanyCode]++
 			hour := logData.RequestTime.Hour()
-			occurAt[hour]++
+			occurAt[strconv.Itoa(hour)]++
 		} else {
 			theSet.Add(logData.Status)
 		}
@@ -78,11 +78,15 @@ func outPut() {
 	fmt.Printf("占比： %0.2f", percent)
 	fmt.Println("%")
 
-	s, _ := json.Marshal(errCompany)
-	fmt.Printf("重复商家详情：\n %v \n\n", string(s))
+	sortErrCompany := sortByErrCount(errCompany)
+	for _, v := range sortErrCompany {
+		fmt.Printf("商家编码：%v , 重复次数: %d \n", v.CompanyCode, v.ErrCount)
+	}
 
-	at, _ := json.Marshal(occurAt)
-	fmt.Printf("发生时间统计： %v \n", string(at))
+	sortOccurAt := sortByErrCount(occurAt)
+	for _, v := range sortOccurAt {
+		fmt.Printf("时间：%v, 重复次数：%d \n", v.CompanyCode, v.ErrCount)
+	}
 }
 
 func UnmarshallLog(line string) (logData LogSt, err error) {
