@@ -64,7 +64,8 @@ func outPut() {
 	fmt.Printf("共有 %d 条重复房态消息 \n", errCount)
 	percent := float64(errCount) / float64(logCount) * 100
 
-	fmt.Printf("占比： %0.2f \n", percent)
+	fmt.Printf("占比： %0.2f", percent)
+	fmt.Println("%")
 
 	s, _ := json.Marshal(errCompany)
 	fmt.Printf("重复商家详情：\n %v \n\n", string(s))
