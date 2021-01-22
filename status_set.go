@@ -14,3 +14,18 @@ func (set StatusSet) Has(status int) bool {
 	_, ok := set[status]
 	return ok
 }
+
+type CompanySet map[string]struct{}
+
+func (set CompanySet) Add(companyCode string) {
+	set[companyCode] = struct{}{}
+}
+
+func (set CompanySet) Remove(companyCode string) {
+	delete(set, companyCode)
+}
+
+func (set CompanySet) Has(companyCode string) bool {
+	_, ok := set[companyCode]
+	return ok
+}

@@ -12,14 +12,18 @@ import (
 
 var gMutex sync.Mutex
 var theSet StatusSet
+var companySet CompanySet
 var errCompany map[string]int
+var occurAt map[int]int
 var logCount = 0
 
 var targetModel = "BoxStateHashCode"
 
 func initData() {
 	theSet = make(map[int]struct{}, 0)
+	companySet = make(map[string]struct{}, 0)
 	errCompany = make(map[string]int, 0)
+	occurAt = make(map[int]int, 0)
 }
 
 func lineProcess(line string) {
@@ -44,10 +48,13 @@ func lineProcess(line string) {
 	if logData.Model == targetModel {
 		if theSet.Has(logData.Status) { //出现重复数据
 			errCompany[logData.CompanyCode]++
+			hour := logData.RequestTime.Hour()
+			occurAt[hour]++
 		} else {
 			theSet.Add(logData.Status)
 		}
 		logCount++
+		companySet.Add(logData.CompanyCode)
 	}
 	gMutex.Unlock()
 }
@@ -55,13 +62,17 @@ func lineProcess(line string) {
 func outPut() {
 	fmt.Printf("共处理了 %d 条房态 HashCode 日志数据 \n", logCount)
 	errSize := len(errCompany)
-	fmt.Printf("其中有 %d 个商家出现房态重复 ", errSize)
+	companySize := len(companySet)
+	per := float64(errSize) / float64(companySize) * 100
+	fmt.Printf("其中有 %d 个商家出现房态重复，共记：%d 个商家， 占比 %0.2f", errSize, companySize, per)
+	fmt.Println("%")
+
 	errCount := 0
 	for _, count := range errCompany {
 		errCount += count
 	}
 
-	fmt.Printf("共有 %d 条重复房态消息 \n", errCount)
+	fmt.Printf("共有 %d 条重复房态消息 ", errCount)
 	percent := float64(errCount) / float64(logCount) * 100
 
 	fmt.Printf("占比： %0.2f", percent)
@@ -69,6 +80,9 @@ func outPut() {
 
 	s, _ := json.Marshal(errCompany)
 	fmt.Printf("重复商家详情：\n %v \n\n", string(s))
+
+	at, _ := json.Marshal(occurAt)
+	fmt.Printf("发生时间统计： %v \n", string(at))
 }
 
 func UnmarshallLog(line string) (logData LogSt, err error) {
